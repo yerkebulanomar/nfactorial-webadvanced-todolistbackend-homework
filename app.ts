@@ -57,12 +57,20 @@ app.put(
     try {
       const id = req.params.id;
       const newStatus = req.params.newstatus;
-      const updatedData = await ToDoList.findByIdAndUpdate(
-        id,
-        { status: newStatus },
-        { new: true }
-      );
-      res.status(200).json(updatedData);
+      if (
+        newStatus === "done" ||
+        newStatus === "todo" ||
+        newStatus === "trash"
+      ) {
+        const updatedData = await ToDoList.findByIdAndUpdate(
+          id,
+          { status: newStatus },
+          { new: true }
+        );
+        res.status(200).json(updatedData);
+      } else {
+        res.status(406).send("Incorrect status");
+      }
     } catch (err: any) {
       console.log(err.message);
       res.status(500).send("Error updating document");
@@ -73,14 +81,11 @@ app.put(
 app.delete("/todolist/delete/:id", async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
-    const deletedDoc = await ToDoList.findByIdAndDelete(id);
-    if (!deletedDoc) {
-      return res.status(404).send("Document not found");
-    }
+    await ToDoList.findByIdAndDelete(id);
     res.status(200).send("Document deleted successfully");
   } catch (err) {
     console.log(err);
-    res.status(500).send("Error deleting document");
+    res.status(500).send("Document not found");
   }
 });
 

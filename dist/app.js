@@ -67,8 +67,15 @@ app.put("/todolist/update/:id/:newstatus", (req, res) => __awaiter(void 0, void 
     try {
         const id = req.params.id;
         const newStatus = req.params.newstatus;
-        const updatedData = yield ToDoModel_1.ToDoList.findByIdAndUpdate(id, { status: newStatus }, { new: true });
-        res.status(200).json(updatedData);
+        if (newStatus === "done" ||
+            newStatus === "todo" ||
+            newStatus === "trash") {
+            const updatedData = yield ToDoModel_1.ToDoList.findByIdAndUpdate(id, { status: newStatus }, { new: true });
+            res.status(200).json(updatedData);
+        }
+        else {
+            res.status(406).send("Incorrect status");
+        }
     }
     catch (err) {
         console.log(err.message);
@@ -78,15 +85,12 @@ app.put("/todolist/update/:id/:newstatus", (req, res) => __awaiter(void 0, void 
 app.delete("/todolist/delete/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
     try {
-        const deletedDoc = yield ToDoModel_1.ToDoList.findByIdAndDelete(id);
-        if (!deletedDoc) {
-            return res.status(404).send("Document not found");
-        }
+        yield ToDoModel_1.ToDoList.findByIdAndDelete(id);
         res.status(200).send("Document deleted successfully");
     }
     catch (err) {
         console.log(err);
-        res.status(500).send("Error deleting document");
+        res.status(500).send("Document not found");
     }
 }));
 app.listen(8080, () => {
